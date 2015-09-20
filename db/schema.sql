@@ -1,10 +1,10 @@
 -- +----------------------------------------------+
 -- | GUI SHADOW database schema                   |
 -- +----------------------------------------------+
--- | Version  : 2.0                               |
+-- | Version  : 2.1                               |
 -- | Language : Standard SQL                      |
--- | Date     : Wed Mar 11 2015                   |
--- | Schema   : shadow/2.0                        |
+-- | Date     : Sat Sep 19 2015                   |
+-- | Schema   : shadow/2.1                        |
 -- | Authors  : David Soler <aensoler@gmail.com>  |
 -- +----------------------------------------------+
 
@@ -95,5 +95,3 @@ INSERT INTO main.positions VALUES
 	("Vocal"),("Vocal:Administración"),("Vocal:Exteriores"),("Vocal:Sede"),
 	("Vocal:Informática"),("Vocal:Servicios"),("Vocal:Desarrollo"),("Vocal:Actividades");
 
-INSERT INTO main.types VALUES
-	("Avatar");

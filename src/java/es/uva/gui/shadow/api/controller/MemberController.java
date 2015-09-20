@@ -3,10 +3,10 @@ package es.uva.gui.shadow.api.controller;
 import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
-import es.uva.gui.shadow.config.Config;
 import es.uva.gui.shadow.persistence.dto.UserDTO;
 import es.uva.gui.shadow.persistence.persistence.ConnectionFail;
 import es.uva.gui.shadow.persistence.persistence.PersistenceFacade;
+import es.uva.gui.shadow.persistence.persistence.IPersistenceFacade;
 
 /**
  * Controlador de la API correspondiente a las peticiones HTTP acerca de los
@@ -16,9 +16,9 @@ import es.uva.gui.shadow.persistence.persistence.PersistenceFacade;
  * @version 0.2
  */
 
-public abstract class MemberController {
+public class MemberController {
     
-    private static PersistenceFacade pf;
+    private IPersistenceFacade pf;
     
     /**
      * Comprobación de los parámetros de una petición GET para obtener un listado
@@ -39,7 +39,7 @@ public abstract class MemberController {
      * HTTP 400 (BAD REQUEST) en caso contrario.
      */
     
-    public static int checkFilterParam (Enumeration <String> en){
+    public int checkFilterParam (Enumeration <String> en){
         
         int res = HttpServletResponse.SC_OK;
         String param;
@@ -79,7 +79,7 @@ public abstract class MemberController {
      * HTTP 400 (BAD REQUEST) en caso contrario.
      */
     
-    public static int checkFieldParam (Map <String, String[]> values){
+    public int checkFieldParam (Map <String, String[]> values){
     
         return (values.get(AllowedParams.PARAM_LOGIN) == null ||
             values.get(AllowedParams.PARAM_PASSWORD) == null ||
@@ -100,9 +100,9 @@ public abstract class MemberController {
      * el miembro existe o el estado HTTP 400 (BAD REQUEST) en caso contrario.
      */
     
-    public static int checkId (String id){
+    public int checkId (String id){
         
-        pf = MemberController.getConnection();
+        pf = getConnection();
         UserDTO member;
         
         try {
@@ -129,21 +129,21 @@ public abstract class MemberController {
      * será un String vacío
      */
     
-    public static String getMemberFiltered (Map <String, String[]> param, Enumeration <String> en){
+    public String getMemberFiltered (Map <String, String[]> param, Enumeration <String> en){
         
-        pf = MemberController.getConnection();
+        pf = getConnection();
         
-        try {
+        //try {
             
             // Completar la función
             return null;
             
-        } catch (ConnectionFail cf){
+        /*} catch (ConnectionFail cf){
             
             System.err.println(cf.getMessage());
             return "";
             
-        }
+        }*/
     }
     
     /**
@@ -156,20 +156,21 @@ public abstract class MemberController {
      * será un String vacío
      */
     
-    public static String getMemberById (String id){
+    public String getMemberById (String id){
         
-        pf = MemberController.getConnection();
+        pf = getConnection();
         
         try {
             
-            return pf.getUser(id).toJson().toString();
+            UserDTO user = pf.getUser(id);
+            return (user != null) ? pf.getUser(id).toJson().toString() : "";
             
         } catch (ConnectionFail cf){
             
             System.err.println(cf.getMessage());
             return "";
             
-        }        
+        }
     }
     
     /**
@@ -183,11 +184,11 @@ public abstract class MemberController {
      * 409 (CONFLICT)
      */
     
-    public static int postMember (UserDTO user){
+    public int postMember (UserDTO user){
         
-        pf = MemberController.getConnection();
+        pf = getConnection();
         
-        if (pf.checkUnique(user.getLogin(), user.getDni(), user.getEmail())){
+        //if (pf.checkUnique(user.getLogin(), user.getDni(), user.getEmail())){
             
             try {
                 
@@ -201,7 +202,7 @@ public abstract class MemberController {
                 
             }
             
-        } else return HttpServletResponse.SC_CONFLICT;
+        //} else return HttpServletResponse.SC_CONFLICT;
         
     }
     
@@ -215,11 +216,11 @@ public abstract class MemberController {
      * o, en caso contrario, se devolverá el estado HTTP 200 (OK)
      */
     
-    public static int deleteMember (String id){
+    public int deleteMember (String id){
         
-        if (MemberController.checkId(id) == HttpServletResponse.SC_OK){
+        if (checkId(id) == HttpServletResponse.SC_OK){
             
-            pf = MemberController.getConnection();
+            pf = getConnection();
             
             try {
                 
@@ -250,7 +251,7 @@ public abstract class MemberController {
      * estado HTTP 409 (CONFLICT)
      */
     
-    public static int putMember (String id, Map <String, String[]> param, Enumeration <String> en){
+    public int putMember (String id, Map <String, String[]> param, Enumeration <String> en){
         
         // Completar la función
         return 0;
@@ -264,9 +265,16 @@ public abstract class MemberController {
      * @return la conexión a la base de datos
      */
     
-    private static PersistenceFacade getConnection (){
+    private PersistenceFacade getConnection (){
         
-        return (MemberController.pf != null) ? MemberController.pf : new PersistenceFacade (Config.CONFIG_DATABASE);
+        if (pf == null){
+            
+            pf = new PersistenceFacade ("database.db");
+            pf.open();
+            
+        }
+        
+        return (PersistenceFacade) pf;
         
     }
     

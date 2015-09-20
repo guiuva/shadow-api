@@ -21,6 +21,8 @@ import es.uva.gui.shadow.persistence.dto.UserDTO;
 @WebServlet(name = "MemberServlet", urlPatterns = {"/member/*"})
 public class MemberServlet extends HttpServlet {
 
+    private MemberController mc;
+    
     /**
      * Procesa una petición GET en función a la ruta introducida. Existen dos tipos:
      *  
@@ -60,24 +62,25 @@ public class MemberServlet extends HttpServlet {
         // Hay que definir el parámetro de auth y el código de acciones, o plantearlo
         // de otra forma
         if (MemberAuthentification.checkAuth(null, 0) == HttpServletResponse.SC_OK){
-        
+            
             String args [] = getArgs(request.getPathInfo());
+            mc = new MemberController();
 
             if (args == null){
 
-                int res = MemberController.checkFilterParam(request.getParameterNames());
+                int res = mc.checkFilterParam(request.getParameterNames());
 
                 if (res == HttpServletResponse.SC_BAD_REQUEST)
                     response.sendError(res);
 
                 else {
 
-                    String message = MemberController.getMemberFiltered(request.getParameterMap(),
+                    String message = mc.getMemberFiltered(request.getParameterMap(),
                         request.getParameterNames());
                     
                     if (!message.equals("")){
                         
-                        response.getWriter().print(message);
+                        response.getWriter().print("Mensaje: '" + message + "'\nPath: " + request.getPathInfo() + "\nNumero argumentos: " + args.length);
                         response.setStatus(HttpServletResponse.SC_OK);
                     
                     } else response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -85,14 +88,14 @@ public class MemberServlet extends HttpServlet {
 
             } else if (args.length == 1){
 
-                int res = MemberController.checkId(args[0]);
+                int res = mc.checkId(args[0]);
 
                 if (res == HttpServletResponse.SC_BAD_REQUEST)
                     response.sendError(res);
 
                 else {
 
-                    String message = MemberController.getMemberById(args[0]);
+                    String message = mc.getMemberById(args[0]);
                     
                     if (!message.equals("")){
                     
@@ -155,15 +158,16 @@ public class MemberServlet extends HttpServlet {
         if (MemberAuthentification.checkAuth(null, 0) == HttpServletResponse.SC_OK){
             
             String args [] = getArgs(request.getPathInfo());
+            mc = new MemberController();
 
             if (args == null) {
 
-                if (MemberController.checkFieldParam(request.getParameterMap())
+                if (mc.checkFieldParam(request.getParameterMap())
                     != HttpServletResponse.SC_BAD_REQUEST){
 
                     // Hay que convertir los datos obtenidos al nuevo usuario
                     UserDTO newUser = null;
-                    int res = MemberController.postMember(newUser);
+                    int res = mc.postMember(newUser);
 
                     if (res == HttpServletResponse.SC_CONFLICT ||
                         res == HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -214,10 +218,11 @@ public class MemberServlet extends HttpServlet {
         if (MemberAuthentification.checkAuth(null, 0) == HttpServletResponse.SC_OK){
         
             String args [] = getArgs(request.getPathInfo());
+            mc = new MemberController();
 
             if (args != null && args.length == 1) {
 
-                int res = MemberController.deleteMember(args[0]);
+                int res = mc.deleteMember(args[0]);
 
                 if (res == HttpServletResponse.SC_BAD_REQUEST ||
                     res == HttpServletResponse.SC_INTERNAL_SERVER_ERROR)
@@ -266,12 +271,13 @@ public class MemberServlet extends HttpServlet {
         if (MemberAuthentification.checkAuth(null, 0) == HttpServletResponse.SC_OK){
         
             String args [] = getArgs(request.getPathInfo());
+            mc = new MemberController();
 
             if (args != null && args.length == 1) {
 
-                if (MemberController.checkId(args[0]) != HttpServletResponse.SC_BAD_REQUEST){
+                if (mc.checkId(args[0]) != HttpServletResponse.SC_BAD_REQUEST){
 
-                    int res = MemberController.putMember(args[0],
+                    int res = mc.putMember(args[0],
                         request.getParameterMap(),
                         request.getParameterNames());
 

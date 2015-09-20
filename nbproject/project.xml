@@ -16,6 +16,9 @@
                 </library>
                 <library dirs="200">
                     <file>${file.reference.json-simple-1.1.1.jar}</file>
+                </library>
+                <library dirs="200">
+                    <file>${file.reference.json-20141113.jar}</file>
                     <path-in-war>WEB-INF/lib</path-in-war>
                 </library>
             </web-module-libraries>
