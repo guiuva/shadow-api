@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import es.uva.gui.shadow.persistence.dto.UserDTO;
+import es.uva.gui.shadow.persistence.persistence.Config;
 import es.uva.gui.shadow.persistence.persistence.ConnectionFail;
 import es.uva.gui.shadow.persistence.persistence.PersistenceFacade;
 import es.uva.gui.shadow.persistence.persistence.IPersistenceFacade;
@@ -26,10 +27,6 @@ public class MemberController {
      * 
      * Si los parámetros coinciden con 'all', 'year', 'position' o 'position_year'
      * el valor devuelto es el estado HTTP 200 (OK).
-     * 
-     * En el caso del tipo parámetro, existen todos los parámetros obligatorios
-     * de UserDTO de la librería org.gui.shadow.dto el valor devuelto es el estado
-     * HTTP 200 (OK).
      * 
      * Si, al menos, uno de los parámetros no coincide con los permitidos el valor
      * devuelto es el estado HTTP 400 (BAD REQUEST).
@@ -87,7 +84,7 @@ public class MemberController {
             values.get(AllowedParams.PARAM_NAME) == null ||
             values.get(AllowedParams.PARAM_SURNAME) == null ||
             values.get(AllowedParams.PARAM_EMAIL) == null)
-            ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST;
+            ? HttpServletResponse.SC_BAD_REQUEST : HttpServletResponse.SC_OK;
         
     }
     
@@ -108,7 +105,7 @@ public class MemberController {
         try {
             
             member = pf.getUser(id);
-            return (member == null) ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST;
+            return (member != null) ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST;
         
         } catch (ConnectionFail cf){
         
@@ -189,7 +186,8 @@ public class MemberController {
         pf = getConnection();
         
         //if (pf.checkUnique(user.getLogin(), user.getDni(), user.getEmail())){
-            
+        if (checkId(user.getLogin()) != HttpServletResponse.SC_OK){
+        
             try {
                 
                 pf.createUser(user);
@@ -202,7 +200,7 @@ public class MemberController {
                 
             }
             
-        //} else return HttpServletResponse.SC_CONFLICT;
+        } else return HttpServletResponse.SC_CONFLICT;
         
     }
     
@@ -269,7 +267,7 @@ public class MemberController {
         
         if (pf == null){
             
-            pf = new PersistenceFacade ("database.db");
+            pf = new PersistenceFacade ("/usr/share/shadow/" + Config.DATABASE);
             pf.open();
             
         }

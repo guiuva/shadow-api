@@ -1,5 +1,6 @@
 package es.uva.gui.shadow.api.servlet;
 
+import es.uva.gui.shadow.api.controller.AllowedParams;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -9,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import es.uva.gui.shadow.api.controller.MemberController;
 import es.uva.gui.shadow.auth.MemberAuthentification;
 import es.uva.gui.shadow.persistence.dto.UserDTO;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Servlet manejador de las peticiones HTTP contra la API de los miebros del Grupo
@@ -80,7 +83,7 @@ public class MemberServlet extends HttpServlet {
                     
                     if (!message.equals("")){
                         
-                        response.getWriter().print("Mensaje: '" + message + "'\nPath: " + request.getPathInfo() + "\nNumero argumentos: " + args.length);
+                        response.getWriter().print(message);
                         response.setStatus(HttpServletResponse.SC_OK);
                     
                     } else response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -165,8 +168,7 @@ public class MemberServlet extends HttpServlet {
                 if (mc.checkFieldParam(request.getParameterMap())
                     != HttpServletResponse.SC_BAD_REQUEST){
 
-                    // Hay que convertir los datos obtenidos al nuevo usuario
-                    UserDTO newUser = null;
+                    UserDTO newUser = paramsToUserDTO(request.getParameterMap());
                     int res = mc.postMember(newUser);
 
                     if (res == HttpServletResponse.SC_CONFLICT ||
@@ -305,8 +307,35 @@ public class MemberServlet extends HttpServlet {
     
     private String [] getArgs (String path){
         
-        String res [] = path.substring(1, path.length()).split("/");
-        return (res.length == 1 && res[0].isEmpty()) ? null : res;
+        if (path != null) {
+            
+            String res [] = path.substring(1, path.length()).split("/");
+            return (res.length == 1 && res[0].isEmpty()) ? null : res;
+            
+        } return null;
+    }
+    
+    private UserDTO paramsToUserDTO (Map <String, String[]> values){
+        
+        UserDTO user = new UserDTO(values.get(AllowedParams.PARAM_LOGIN)[0]);
+        String aux [];
+        
+        user.setPassword(values.get(AllowedParams.PARAM_PASSWORD)[0]);
+        user.setDni(values.get(AllowedParams.PARAM_DNI)[0]);
+        user.setName(values.get(AllowedParams.PARAM_NAME)[0]);
+        user.setSurname(values.get(AllowedParams.PARAM_SURNAME)[0]);
+        user.setEmail(values.get(AllowedParams.PARAM_EMAIL)[0]);
+        
+        aux = values.get(AllowedParams.PARAM_PHONE);
+        if (aux != null) user.setPhone(aux[0]);
+        
+        aux = values.get(AllowedParams.PARAM_STUDY);
+        if (aux != null) user.setStudy(aux[0]);
+        
+        aux = values.get(AllowedParams.PARAM_MEMBERSHIP);
+        if (aux != null) user.setMembership(new Date(aux[0]));
+        
+        return user;
         
     }
 }
